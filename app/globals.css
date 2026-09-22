@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-primary: #FF5722;
+  --color-primary-dark: #E64A19;
+  --color-secondary: #212121;
+  --color-bg-light: #F9FAFB;
+
+  --font-sans: var(--font-inter);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-bg-light);
+  color: var(--color-secondary);
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-gray-200);
+  }
+}
