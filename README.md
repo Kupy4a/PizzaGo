@@ -1,65 +1,83 @@
 # PizzaGo
 
-Интернет-магазин доставки пиццы: меню по категориям, карточка товара, корзина и оформление заказа.
+**English** | [Русский](README.ru.md)
 
-![Главная страница](docs/home.png)
+A pizza delivery storefront: menu by category, product details, cart and checkout. The interface is available in English and Russian.
 
-## Возможности
+![Home page](docs/home.png)
 
-- Слайдер акций с автопрокруткой, паузой при наведении и ручным переключением
-- Меню по категориям (пицца, десерты, напитки) с плавной прокруткой из шапки
-- Модальное окно товара, выдвижная корзина, счётчик товаров в шапке
-- Корзина сохраняется в `localStorage` и переживает перезагрузку страницы
-- Оформление заказа с проверкой полей на клиенте и на сервере
-- API заказа `POST /api/orders` сам пересчитывает сумму по каталогу, цены с клиента не принимаются
-- Заказы сохраняются в Supabase, а если он не настроен, в локальный файл `.data/orders.json`
-- Адаптивная вёрстка, закрытие окон по Esc, подписи для экранных дикторов
+## Features
 
-| Корзина | Оформление заказа |
+- Promo slider with autoplay, pause on hover and manual navigation
+- Menu grouped by category (pizza, desserts, drinks) with smooth scrolling from the header
+- Product modal, slide-over cart and item counter in the header
+- English / Russian interface with a switcher in the header; the choice is remembered in a cookie
+- The cart is saved in `localStorage` and survives page reloads
+- Checkout form validated both in the browser and on the server
+- The `POST /api/orders` endpoint recalculates the total from the catalog and never trusts prices sent by the client
+- Orders are stored in Supabase, or in a local `.data/orders.json` file when Supabase isn't configured
+- Responsive layout, Esc closes dialogs, labelled controls for screen readers
+
+| Cart | Checkout |
 |---|---|
-| ![Корзина](docs/cart.png) | ![Оформление](docs/checkout.png) |
+| ![Cart](docs/cart.png) | ![Checkout](docs/checkout.png) |
 
-## Стек
+## Tech stack
 
 Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · Framer Motion · Zustand · Supabase
 
-## Запуск
+## Getting started
 
-Нужен Node.js 20.19+ (рекомендуется 22 LTS).
+Requires Node.js 20.9 or newer (22 LTS recommended).
+
+**Windows:** double-click `run.cmd` or run it from a terminal.
+
+**Linux / macOS:**
+
+```bash
+./run.sh
+```
+
+The launcher checks the Node.js version, installs dependencies on the first run and starts the dev server at http://localhost:3000. Pass `prod` to build and run the production version: `run.cmd prod` or `./run.sh prod`.
+
+Dependencies include native binaries built for one operating system. If you open the same folder from Windows and from WSL/Linux, the launcher notices that `node_modules` belongs to the other system and reinstalls it.
+
+You can also use npm directly:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Приложение откроется на http://localhost:3000. Без настройки Supabase всё работает: заказы пишутся в `.data/orders.json`.
+### Supabase (optional)
 
-### Подключение Supabase
+1. Create a Supabase project and run [`supabase/schema.sql`](supabase/schema.sql) in the SQL Editor. It creates the tables and row-level security policies and seeds the menu.
+2. Copy `.env.example` to `.env.local` and fill in the project URL and anon key.
 
-1. Создайте проект в Supabase и выполните [`supabase/schema.sql`](supabase/schema.sql) в SQL Editor: он создаёт таблицы, политики RLS и наполняет меню.
-2. Скопируйте `.env.example` в `.env.local` и укажите URL проекта и anon key.
+## Scripts
 
-## Скрипты
-
-| Команда | Что делает |
+| Command | Description |
 |---|---|
-| `npm run dev` | сервер разработки |
-| `npm run build` | production-сборка |
-| `npm start` | запуск собранного приложения |
+| `npm run dev` | development server |
+| `npm run build` | production build |
+| `npm start` | run the production build |
 | `npm run lint` | ESLint |
+| `npm run launch` | same as `run.cmd` / `run.sh` |
 
-## Структура
+## Project structure
 
 ```
 app/
-  page.tsx            главная: слайдер и меню
-  checkout/           оформление заказа
-  success/            страница «заказ принят»
-  api/orders/         API создания заказа
-components/           UI-компоненты (корзина, карточки, модалки, шапка)
+  page.tsx            home page: slider and menu
+  checkout/           checkout form
+  success/            order confirmation
+  api/orders/         order creation endpoint
+components/           UI components (cart, cards, dialogs, header, language switcher)
 lib/
-  menu.ts             каталог товаров и баннеры
-  order.ts            валидация заказа и пересчёт суммы
-  cart-store.ts       состояние корзины (Zustand + persist)
-supabase/schema.sql   схема базы данных
+  i18n/               locales, dictionaries, language context
+  menu.ts             product catalog and banners in both languages
+  order.ts            order validation and total calculation
+  cart-store.ts       cart state (Zustand + persist)
+scripts/start.mjs     cross-platform launcher
+supabase/schema.sql   database schema
 ```

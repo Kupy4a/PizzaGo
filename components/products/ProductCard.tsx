@@ -1,8 +1,11 @@
+'use client';
+
 import Image from 'next/image';
 import { Plus } from 'lucide-react';
 import type { Product } from '@/types';
 import { Card } from '@/components/ui/Card';
 import { formatPrice } from '@/lib/format';
+import { useI18n } from '@/lib/i18n/context';
 
 interface ProductCardProps {
   product: Product;
@@ -10,6 +13,7 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenModal }) => {
+  const { t, locale } = useI18n();
   const unavailable = !product.is_available;
 
   return (
@@ -19,7 +23,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenModal }
         disabled={unavailable}
         onClick={() => onOpenModal(product)}
         className="block w-full text-left disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl"
-        aria-label={`${product.name}, ${formatPrice(product.price)}`}
+        aria-label={`${product.name}, ${formatPrice(product.price, locale)}`}
       >
         <div className="relative aspect-square overflow-hidden bg-gray-100">
           <Image
@@ -31,7 +35,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenModal }
           />
           {unavailable && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-              <span className="text-white font-semibold text-sm">Нет в наличии</span>
+              <span className="text-white font-semibold text-sm">{t.menu.unavailable}</span>
             </div>
           )}
         </div>
@@ -39,7 +43,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenModal }
           <h3 className="font-semibold text-secondary mb-1 truncate">{product.name}</h3>
           <p className="text-sm text-gray-500 line-clamp-2 min-h-10 mb-3">{product.description}</p>
           <div className="flex items-center justify-between">
-            <span className="text-lg font-bold text-primary">{formatPrice(product.price)}</span>
+            <span className="text-lg font-bold text-primary">{formatPrice(product.price, locale)}</span>
             <span className="p-2 rounded-full bg-primary text-white group-hover:bg-primary-dark transition-colors">
               <Plus className="w-5 h-5" aria-hidden />
             </span>

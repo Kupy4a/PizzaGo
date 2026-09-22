@@ -5,9 +5,11 @@ import Link from 'next/link';
 import { Pizza, ShoppingBag } from 'lucide-react';
 import { useCartStore, selectItemCount } from '@/lib/cart-store';
 import { useHydrated } from '@/lib/use-hydrated';
-import { categories } from '@/lib/menu';
+import { useI18n } from '@/lib/i18n/context';
+import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
 
 export const Navbar: React.FC = () => {
+  const { t, menu } = useI18n();
   const toggleCart = useCartStore((s) => s.toggleCart);
   const itemCount = useCartStore(selectItemCount);
   const hydrated = useHydrated();
@@ -36,7 +38,7 @@ export const Navbar: React.FC = () => {
           </Link>
 
           <div className="hidden md:flex items-center gap-1">
-            {categories.map((cat) => (
+            {menu.categories.map((cat) => (
               <Link
                 key={cat.slug}
                 href={`/#category-${cat.slug}`}
@@ -47,19 +49,22 @@ export const Navbar: React.FC = () => {
             ))}
           </div>
 
-          <button
-            type="button"
-            onClick={toggleCart}
-            aria-label={count > 0 ? `Корзина, товаров: ${count}` : 'Корзина'}
-            className="relative p-2 rounded-full hover:bg-orange-50 transition-colors"
-          >
-            <ShoppingBag className="w-6 h-6 text-secondary" />
-            {count > 0 && (
-              <span className="absolute -top-1 -right-1 bg-primary text-white text-xs font-bold rounded-full min-w-5 h-5 px-1 flex items-center justify-center">
-                {count}
-              </span>
-            )}
-          </button>
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher />
+            <button
+              type="button"
+              onClick={toggleCart}
+              aria-label={count > 0 ? t.nav.cartCount(count) : t.nav.cart}
+              className="relative p-2 rounded-full hover:bg-orange-50 transition-colors"
+            >
+              <ShoppingBag className="w-6 h-6 text-secondary" />
+              {count > 0 && (
+                <span className="absolute -top-1 -right-1 bg-primary text-white text-xs font-bold rounded-full min-w-5 h-5 px-1 flex items-center justify-center">
+                  {count}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </nav>

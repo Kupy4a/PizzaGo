@@ -3,13 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=20.19"
+    "node": ">=20.9"
   },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "launch": "node scripts/start.mjs",
+    "launch:prod": "node scripts/start.mjs prod"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.104.1",

@@ -4,16 +4,19 @@ import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { banners } from '@/lib/menu';
+import { useI18n } from '@/lib/i18n/context';
 
 const AUTOPLAY_MS = 5000;
 
 export const HeroSlider: React.FC = () => {
+  const { t, menu } = useI18n();
+  const { banners } = menu;
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
 
-  const next = useCallback(() => setCurrent((c) => (c + 1) % banners.length), []);
-  const prev = useCallback(() => setCurrent((c) => (c - 1 + banners.length) % banners.length), []);
+  const count = banners.length;
+  const next = useCallback(() => setCurrent((c) => (c + 1) % count), [count]);
+  const prev = useCallback(() => setCurrent((c) => (c - 1 + count) % count), [count]);
 
   // Restarts on every slide change, so manual navigation resets the timer.
   useEffect(() => {
@@ -62,7 +65,7 @@ export const HeroSlider: React.FC = () => {
                 href={banner.link_url}
                 className="inline-block bg-primary text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-primary-dark transition-colors shadow-lg"
               >
-                Смотреть меню
+                {t.hero.cta}
               </a>
             </motion.div>
           </div>
@@ -72,16 +75,16 @@ export const HeroSlider: React.FC = () => {
       <button
         type="button"
         onClick={prev}
-        aria-label="Предыдущий слайд"
-        className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white transition-colors"
+        aria-label={t.hero.prev}
+        className="hidden md:block absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white transition-colors"
       >
         <ChevronLeft className="w-6 h-6" />
       </button>
       <button
         type="button"
         onClick={next}
-        aria-label="Следующий слайд"
-        className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white transition-colors"
+        aria-label={t.hero.next}
+        className="hidden md:block absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white transition-colors"
       >
         <ChevronRight className="w-6 h-6" />
       </button>
@@ -92,7 +95,7 @@ export const HeroSlider: React.FC = () => {
             key={b.id}
             type="button"
             onClick={() => setCurrent(i)}
-            aria-label={`Слайд ${i + 1}`}
+            aria-label={t.hero.slide(i + 1)}
             aria-current={i === current}
             className={`h-2 rounded-full transition-all ${
               i === current ? 'w-8 bg-primary' : 'w-2 bg-white/50 hover:bg-white/70'

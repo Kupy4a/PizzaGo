@@ -1,12 +1,8 @@
 import { findProduct } from '@/lib/menu';
+import type { ErrorCode } from '@/lib/i18n/dictionaries';
 
-export const PAYMENT_METHODS = {
-  card: 'Банковская карта онлайн',
-  card_on_delivery: 'Картой при получении',
-  cash: 'Наличными курьеру',
-} as const;
-
-export type PaymentMethod = keyof typeof PAYMENT_METHODS;
+export const PAYMENT_METHODS = ['card', 'card_on_delivery', 'cash'] as const;
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
 export interface OrderRequest {
   items: { productId: string; quantity: number }[];
@@ -35,12 +31,12 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const str = (v: unknown, max = 200) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 
-type Result = { ok: true; order: ValidatedOrder } | { ok: false; error: string };
+type Result = { ok: true; order: ValidatedOrder } | { ok: false; error: ErrorCode };
 
 // Validates an untrusted order payload. Prices come from the catalog,
-// never from the client.
+// never from the client. Errors are codes; the UI translates them.
 export function validateOrder(body: unknown): Result {
-  if (typeof body !== 'object' || body === null) return { ok: false, error: 'Некорректный запрос' };
+  if (typeof body !== 'object' || body === null) return { ok: false, error: 'bad_request' };
   const data = body as Record<string, unknown>;
   const customer = (data.customer ?? {}) as Record<string, unknown>;
   const address = (data.address ?? {}) as Record<string, unknown>;
@@ -48,33 +44,33 @@ export function validateOrder(body: unknown): Result {
   const name = str(customer.name, 100);
   const phone = str(customer.phone, 30);
   const email = str(customer.email, 100);
-  if (!name) return { ok: false, error: 'Укажите имя' };
-  if (!PHONE_RE.test(phone)) return { ok: false, error: 'Некорректный телефон' };
-  if (!EMAIL_RE.test(email)) return { ok: false, error: 'Некорректный email' };
+  if (!name) return { ok: false, error: 'name_required' };
+  if (!PHONE_RE.test(phone)) return { ok: false, error: 'invalid_phone' };
+  if (!EMAIL_RE.test(email)) return { ok: false, error: 'invalid_email' };
 
   const city = str(address.city);
   const street = str(address.street);
   const house = str(address.house, 20);
-  if (!city || !street || !house) return { ok: false, error: 'Заполните адрес доставки' };
+  if (!city || !street || !house) return { ok: false, error: 'address_required' };
 
   const payment = data.payment;
-  if (typeof payment !== 'string' || !(payment in PAYMENT_METHODS)) {
-    return { ok: false, error: 'Выберите способ оплаты' };
+  if (!PAYMENT_METHODS.includes(payment as PaymentMethod)) {
+    return { ok: false, error: 'payment_required' };
   }
 
   if (!Array.isArray(data.items) || data.items.length === 0) {
-    return { ok: false, error: 'Корзина пуста' };
+    return { ok: false, error: 'cart_empty' };
   }
 
   const lines: ValidatedOrder['lines'] = [];
   for (const raw of data.items as Record<string, unknown>[]) {
     const product = findProduct(str(raw?.productId, 50));
     const quantity = Number(raw?.quantity);
-    if (!product || !product.is_available) return { ok: false, error: 'Товар недоступен' };
+    if (!product || !product.is_available) return { ok: false, error: 'product_unavailable' };
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_QUANTITY) {
-      return { ok: false, error: 'Некорректное количество' };
+      return { ok: false, error: 'invalid_quantity' };
     }
-    lines.push({ productId: product.id, name: product.name, quantity, price: product.price });
+    lines.push({ productId: product.id, name: product.name.en, quantity, price: product.price });
   }
 
   return {

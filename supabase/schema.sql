@@ -61,21 +61,23 @@ create policy "banners are public" on banners for select using (true);
 create policy "anyone can create an order" on orders for insert with check (true);
 create policy "anyone can add order items" on order_items for insert with check (true);
 
+-- Seed data. The storefront renders names from lib/menu.ts (English and Russian);
+-- these rows exist so order_items can reference products.
 insert into categories (id, name, slug) values
-  ('1', 'Пицца', 'pizza'),
-  ('2', 'Десерты', 'desserts'),
-  ('3', 'Напитки', 'drinks')
+  ('1', 'Pizza', 'pizza'),
+  ('2', 'Desserts', 'desserts'),
+  ('3', 'Drinks', 'drinks')
 on conflict (id) do nothing;
 
 insert into products (id, name, description, price, category_id) values
-  ('p1', 'Маргарита', 'Классическая пицца с томатным соусом, моцареллой и свежим базиликом', 499, '1'),
-  ('p2', 'Пепперони', 'Острая пепперони, моцарелла, томатный соус и орегано', 599, '1'),
-  ('p3', 'Четыре сыра', 'Моцарелла, горгонзола, пармезан и эмменталь на сливочном соусе', 699, '1'),
-  ('p4', 'Гавайская', 'Ветчина, ананас, моцарелла и томатный соус', 549, '1'),
-  ('d1', 'Тирамису', 'Классический итальянский десерт с маскарпоне и кофе', 349, '2'),
-  ('d2', 'Чизкейк', 'Нью-йоркский чизкейк с ягодным соусом', 399, '2'),
-  ('d3', 'Наполеон', 'Слоёный торт с заварным кремом', 299, '2'),
-  ('dr1', 'Кола', 'Классическая кола 0,5 л', 149, '3'),
-  ('dr2', 'Лимонад', 'Домашний лимонад с мятой 0,5 л', 199, '3'),
-  ('dr3', 'Морс', 'Клюквенный морс 0,5 л', 179, '3')
+  ('p1', 'Margherita', 'Classic pizza with tomato sauce, mozzarella and fresh basil', 499, '1'),
+  ('p2', 'Pepperoni', 'Spicy pepperoni, mozzarella, tomato sauce and oregano', 599, '1'),
+  ('p3', 'Four Cheese', 'Mozzarella, gorgonzola, parmesan and emmental on a cream base', 699, '1'),
+  ('p4', 'Hawaiian', 'Ham, pineapple, mozzarella and tomato sauce', 549, '1'),
+  ('d1', 'Tiramisu', 'Classic Italian dessert with mascarpone and coffee', 349, '2'),
+  ('d2', 'Cheesecake', 'New York cheesecake with berry sauce', 399, '2'),
+  ('d3', 'Napoleon', 'Layered puff pastry cake with custard', 299, '2'),
+  ('dr1', 'Cola', 'Classic cola, 0.5 L', 149, '3'),
+  ('dr2', 'Lemonade', 'Homemade mint lemonade, 0.5 L', 199, '3'),
+  ('dr3', 'Cranberry Mors', 'Cranberry berry drink, 0.5 L', 179, '3')
 on conflict (id) do nothing;

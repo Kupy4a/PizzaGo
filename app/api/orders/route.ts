@@ -57,7 +57,7 @@ export async function POST(req: Request) {
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: 'Некорректный запрос' }, { status: 400 });
+    return NextResponse.json({ error: 'bad_request' }, { status: 400 });
   }
 
   const result = validateOrder(body);
@@ -72,6 +72,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ id, total: result.order.total }, { status: 201 });
   } catch (err) {
     console.error('Order creation error:', err);
-    return NextResponse.json({ error: 'Не удалось создать заказ' }, { status: 500 });
+    return NextResponse.json({ error: 'server_error' }, { status: 500 });
   }
 }

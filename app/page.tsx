@@ -4,11 +4,12 @@ import { useState } from 'react';
 import { HeroSlider } from '@/components/hero/HeroSlider';
 import { CategorySection } from '@/components/products/CategorySection';
 import { ProductModal } from '@/components/products/ProductModal';
-import { categories, products } from '@/lib/menu';
-import type { Product } from '@/types';
+import { useI18n } from '@/lib/i18n/context';
 
 export default function Home() {
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const { t, menu } = useI18n();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selectedProduct = selectedId ? (menu.productById.get(selectedId) ?? null) : null;
 
   return (
     <div>
@@ -16,16 +17,16 @@ export default function Home() {
 
       <div id="menu" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 scroll-mt-16">
         <div className="text-center mb-4">
-          <h1 className="text-4xl font-bold text-secondary mb-4">Наше меню</h1>
+          <h1 className="text-4xl font-bold text-secondary mb-4">{t.menu.title}</h1>
           <div className="h-1 w-20 bg-primary rounded-full mx-auto" />
         </div>
 
-        {categories.map((category) => (
+        {menu.categories.map((category) => (
           <CategorySection
             key={category.slug}
             category={category}
-            products={products.filter((p) => p.category_id === category.id)}
-            onOpenModal={setSelectedProduct}
+            products={menu.products.filter((p) => p.category_id === category.id)}
+            onOpenModal={(product) => setSelectedId(product.id)}
           />
         ))}
       </div>
@@ -33,7 +34,7 @@ export default function Home() {
       <ProductModal
         product={selectedProduct}
         isOpen={selectedProduct !== null}
-        onClose={() => setSelectedProduct(null)}
+        onClose={() => setSelectedId(null)}
       />
     </div>
   );
