@@ -86,6 +86,8 @@ An "Admin panel" link then appears on their "My orders" page.
 
 Every push to `main` redeploys the site. Without Supabase the demo still works, but orders are kept only in temporary storage.
 
+A free Supabase project is paused after a week without activity. [`vercel.json`](vercel.json) schedules a daily Vercel cron job that calls `/api/health`, which runs a small database query and keeps the project awake.
+
 ## Tests
 
 | Command | What it runs |
