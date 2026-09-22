@@ -25,6 +25,8 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · Framer Mo
 
 ## Запуск
 
+Нужен Node.js 20.19+ (рекомендуется 22 LTS).
+
 ```bash
 npm install
 npm run dev
