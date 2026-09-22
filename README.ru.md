@@ -61,11 +61,11 @@ npm run dev
 **В облаке (бесплатный тариф):**
 
 1. Создайте проект на [supabase.com](https://supabase.com).
-2. Откройте *SQL Editor*, вставьте содержимое [`supabase/migrations/20260922000000_init.sql`](supabase/migrations/20260922000000_init.sql) и выполните.
-3. Скопируйте `.env.example` в `.env.local` и укажите *Project URL* и *anon public key* из *Project Settings → API*.
+2. Откройте *SQL Editor* и по очереди выполните файлы из [`supabase/migrations`](supabase/migrations): сначала `…_init.sql`, затем `…_grants.sql`.
+3. Нажмите *Connect* вверху страницы проекта, выберите *App Frameworks → Next.js* и скопируйте две строки `NEXT_PUBLIC_…` в `.env.local` (образец в `.env.example`).
 4. В *Authentication → URL Configuration* укажите в *Site URL* адрес сайта (например, `http://localhost:3000`).
 
-**Локально (Docker):** `npx supabase start` поднимает Supabase с применённой миграцией, `npx supabase status` показывает URL и anon key для `.env.local`.
+**Локально (Docker):** `npx supabase start` поднимает Supabase с применённой миграцией, `npx supabase status` показывает URL и ключ для `.env.local`.
 
 **Как назначить администратора:** после регистрации пользователя выполните в SQL Editor:
 
@@ -81,7 +81,7 @@ insert into admins (user_id) select id from auth.users where email = 'you@exampl
 
 1. Войдите в Vercel через GitHub и нажмите *Add New → Project*.
 2. Импортируйте репозиторий `PizzaGo`; настройки Next.js определятся автоматически.
-3. В *Environment Variables* добавьте `NEXT_PUBLIC_SUPABASE_URL` и `NEXT_PUBLIC_SUPABASE_ANON_KEY` и нажмите *Deploy*.
+3. В *Environment Variables* добавьте те же две переменные, что в `.env.local` (`NEXT_PUBLIC_SUPABASE_URL` и `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`), и нажмите *Deploy*.
 4. Полученный адрес `https://….vercel.app` укажите в Supabase в *Site URL*.
 
 Каждый push в `main` обновляет сайт. Без Supabase демо тоже работает, но заказы хранятся только во временном хранилище.

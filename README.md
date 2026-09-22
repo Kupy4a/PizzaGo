@@ -61,11 +61,11 @@ npm run dev
 **Cloud (free tier):**
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. Open *SQL Editor*, paste [`supabase/migrations/20260922000000_init.sql`](supabase/migrations/20260922000000_init.sql) and run it.
-3. Copy `.env.example` to `.env.local` and fill in *Project URL* and *anon public key* from *Project Settings → API*.
+2. Open *SQL Editor* and run the files from [`supabase/migrations`](supabase/migrations) in order: first `…_init.sql`, then `…_grants.sql`.
+3. Click *Connect* at the top of the project page, choose *App Frameworks → Next.js* and copy the two `NEXT_PUBLIC_…` lines into `.env.local` (see `.env.example`).
 4. In *Authentication → URL Configuration* set *Site URL* to your site address (for example `http://localhost:3000`).
 
-**Local (Docker):** `npx supabase start` launches Supabase with the migration applied; `npx supabase status` prints the URL and anon key for `.env.local`.
+**Local (Docker):** `npx supabase start` launches Supabase with the migration applied; `npx supabase status` prints the URL and key for `.env.local`.
 
 **Making someone an admin:** after the user has signed up, run in the SQL Editor:
 
@@ -81,7 +81,7 @@ An "Admin panel" link then appears on their "My orders" page.
 
 1. Sign in to Vercel with your GitHub account and click *Add New → Project*.
 2. Import the `PizzaGo` repository; the Next.js settings are detected automatically.
-3. Under *Environment Variables* add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`, then click *Deploy*.
+3. Under *Environment Variables* add the same two variables as in `.env.local` (`NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`), then click *Deploy*.
 4. Put the resulting `https://….vercel.app` address into Supabase *Site URL*.
 
 Every push to `main` redeploys the site. Without Supabase the demo still works, but orders are kept only in temporary storage.
