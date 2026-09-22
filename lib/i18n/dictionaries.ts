@@ -86,6 +86,44 @@ const en = {
     text: 'Thank you! We will call you to confirm the order.',
     back: 'Back to menu',
   },
+  auth: {
+    signInTitle: 'Sign in',
+    signUpTitle: 'Create an account',
+    email: 'Email',
+    password: 'Password',
+    passwordHint: 'At least 6 characters',
+    signIn: 'Sign in',
+    signUp: 'Create account',
+    toSignUp: "Don't have an account? Sign up",
+    toSignIn: 'Already have an account? Sign in',
+    checkEmail: 'Check your email to confirm the account, then sign in.',
+    failed: 'Wrong email or password',
+    signUpFailed: 'Could not create the account. The email may already be registered.',
+    notConfigured: 'Accounts need Supabase. Add its keys to .env.local to enable sign-in.',
+    signOut: 'Sign out',
+  },
+  account: {
+    title: 'My orders',
+    link: 'Account',
+    signedInAs: 'Signed in as',
+    empty: 'You have no orders yet. Orders placed while signed in appear here.',
+    order: 'Order',
+    admin: 'Admin panel',
+  },
+  admin: {
+    title: 'All orders',
+    empty: 'No orders yet.',
+    customer: 'Customer',
+    address: 'Address',
+    save: 'Save',
+    status: 'Status',
+  },
+  status: {
+    pending: 'New',
+    processing: 'Cooking',
+    delivered: 'Delivered',
+    cancelled: 'Cancelled',
+  },
   footer: {
     hours: 'Daily, 10:00 – 23:00',
   },
@@ -93,6 +131,7 @@ const en = {
 
 export type Dictionary = typeof en;
 export type ErrorCode = keyof Dictionary['errors'];
+export type OrderStatus = keyof Dictionary['status'];
 
 const ru: Dictionary = {
   meta: {
@@ -179,6 +218,44 @@ const ru: Dictionary = {
     number: 'Номер заказа:',
     text: 'Спасибо! Мы позвоним, чтобы подтвердить заказ.',
     back: 'Вернуться в меню',
+  },
+  auth: {
+    signInTitle: 'Вход',
+    signUpTitle: 'Регистрация',
+    email: 'Email',
+    password: 'Пароль',
+    passwordHint: 'Не короче 6 символов',
+    signIn: 'Войти',
+    signUp: 'Зарегистрироваться',
+    toSignUp: 'Нет аккаунта? Зарегистрируйтесь',
+    toSignIn: 'Уже есть аккаунт? Войдите',
+    checkEmail: 'Проверьте почту, подтвердите аккаунт и войдите.',
+    failed: 'Неверный email или пароль',
+    signUpFailed: 'Не удалось создать аккаунт. Возможно, этот email уже зарегистрирован.',
+    notConfigured: 'Для аккаунтов нужен Supabase. Добавьте его ключи в .env.local, чтобы включить вход.',
+    signOut: 'Выйти',
+  },
+  account: {
+    title: 'Мои заказы',
+    link: 'Аккаунт',
+    signedInAs: 'Вы вошли как',
+    empty: 'Заказов пока нет. Здесь появятся заказы, оформленные после входа.',
+    order: 'Заказ',
+    admin: 'Панель администратора',
+  },
+  admin: {
+    title: 'Все заказы',
+    empty: 'Заказов пока нет.',
+    customer: 'Клиент',
+    address: 'Адрес',
+    save: 'Сохранить',
+    status: 'Статус',
+  },
+  status: {
+    pending: 'Новый',
+    processing: 'Готовится',
+    delivered: 'Доставлен',
+    cancelled: 'Отменён',
   },
   footer: {
     hours: 'Ежедневно с 10:00 до 23:00',

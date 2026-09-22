@@ -1,18 +1,24 @@
 import { NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { promises as fs } from 'fs';
+import os from 'os';
 import path from 'path';
-import { createClient, isSupabaseConfigured } from '@/lib/supabase/server';
+import { getCurrentUser, isSupabaseConfigured } from '@/lib/supabase/server';
 import { validateOrder, type ValidatedOrder } from '@/lib/order';
 
-const ORDERS_FILE = path.join(process.cwd(), '.data', 'orders.json');
+// Vercel's filesystem is read-only except for the temp dir; orders stored
+// there are lost on redeploy, which is fine for a demo without Supabase.
+const ORDERS_DIR = process.env.VERCEL
+  ? path.join(os.tmpdir(), 'pizzago')
+  : path.join(process.cwd(), '.data');
+const ORDERS_FILE = path.join(ORDERS_DIR, 'orders.json');
 
 async function saveToFile(order: ValidatedOrder) {
   let orders: unknown[] = [];
   try {
     orders = JSON.parse(await fs.readFile(ORDERS_FILE, 'utf-8'));
   } catch {
-    await fs.mkdir(path.dirname(ORDERS_FILE), { recursive: true });
+    await fs.mkdir(ORDERS_DIR, { recursive: true });
   }
 
   const id = randomUUID();
@@ -22,21 +28,20 @@ async function saveToFile(order: ValidatedOrder) {
 }
 
 async function saveToSupabase(order: ValidatedOrder) {
-  const supabase = createClient();
-  // The id is generated here: RLS lets anonymous users insert orders
-  // but not read them back, so `insert().select()` would fail.
+  const { supabase, user } = await getCurrentUser();
+  // The id is generated here: guests may insert orders but not read them
+  // back, so `insert().select()` would be rejected by row-level security.
   const id = randomUUID();
 
-  const { error } = await supabase
-    .from('orders')
-    .insert({
-      id,
-      total_price: order.total,
-      status: 'pending',
-      customer: order.customer,
-      address: order.address,
-      payment_method: order.payment,
-    });
+  const { error } = await supabase.from('orders').insert({
+    id,
+    user_id: user?.id ?? null,
+    total_price: order.total,
+    status: 'pending',
+    customer: order.customer,
+    address: order.address,
+    payment_method: order.payment,
+  });
   if (error) throw error;
 
   const { error: itemsError } = await supabase.from('order_items').insert(

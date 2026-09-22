@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Pizza, ShoppingBag } from 'lucide-react';
+import { Pizza, ShoppingBag, User } from 'lucide-react';
 import { useCartStore, selectItemCount } from '@/lib/cart-store';
 import { useHydrated } from '@/lib/use-hydrated';
 import { useI18n } from '@/lib/i18n/context';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
+import { isSupabaseConfigured } from '@/lib/supabase/config';
 
 export const Navbar: React.FC = () => {
   const { t, menu } = useI18n();
@@ -49,8 +50,18 @@ export const Navbar: React.FC = () => {
             ))}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-2">
             <LanguageSwitcher />
+            {isSupabaseConfigured && (
+              <Link
+                href="/account"
+                aria-label={t.account.link}
+                title={t.account.link}
+                className="p-2 rounded-full hover:bg-orange-50 transition-colors"
+              >
+                <User className="w-6 h-6 text-secondary" />
+              </Link>
+            )}
             <button
               type="button"
               onClick={toggleCart}
