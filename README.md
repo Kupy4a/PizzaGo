@@ -2,33 +2,40 @@
 
 **English** | [Русский](README.ru.md)
 
-A pizza delivery storefront: menu by category, product details, cart and checkout. The interface is available in English and Russian.
+[![CI](https://github.com/Kupy4a/PizzaGo/actions/workflows/ci.yml/badge.svg)](https://github.com/Kupy4a/PizzaGo/actions/workflows/ci.yml)
+
+A pizza delivery storefront: menu by category, cart, checkout, customer accounts with order history and an admin panel for managing orders. The interface is available in English and Russian.
 
 ![Home page](docs/home.png)
 
 ## Features
 
-- Promo slider with autoplay, pause on hover and manual navigation
-- Menu grouped by category (pizza, desserts, drinks) with smooth scrolling from the header
-- Product modal, slide-over cart and item counter in the header
+**Storefront**
+- Promo slider, menu grouped by category, product modal, slide-over cart
 - English / Russian interface with a switcher in the header; the choice is remembered in a cookie
 - The cart is saved in `localStorage` and survives page reloads
-- Checkout form validated both in the browser and on the server
-- The `POST /api/orders` endpoint recalculates the total from the catalog and never trusts prices sent by the client
-- Orders are stored in Supabase, or in a local `.data/orders.json` file when Supabase isn't configured
+- Checkout validated in the browser and on the server; `POST /api/orders` recalculates the total from the catalog and never trusts prices sent by the client
 - Responsive layout, Esc closes dialogs, labelled controls for screen readers
 
-| Cart | Checkout |
-|---|---|
-| ![Cart](docs/cart.png) | ![Checkout](docs/checkout.png) |
+**Accounts and orders (Supabase)**
+- Sign up and sign in with email and password
+- "My orders" page with the status of every order placed while signed in
+- Admin panel: all orders with customer details and a status switcher (New → Cooking → Delivered / Cancelled)
+- Access is enforced by PostgreSQL row-level security, not just by the UI: customers only see their own orders, only admins can change statuses
+
+Supabase is optional. Without it the shop still works and stores orders in `.data/orders.json`; account pages are hidden.
+
+| Cart | Checkout | Admin panel |
+|---|---|---|
+| ![Cart](docs/cart.png) | ![Checkout](docs/checkout.png) | ![Admin panel](docs/admin.png) |
 
 ## Tech stack
 
-Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · Framer Motion · Zustand · Supabase
+Next.js 16 (App Router, Server Actions) · React 19 · TypeScript · Tailwind CSS 4 · Framer Motion · Zustand · Supabase (Postgres, Auth, RLS) · Vitest · Playwright · GitHub Actions
 
 ## Getting started
 
-Requires Node.js 20.9 or newer (22 LTS recommended).
+Requires Node.js 20.19 or newer (22 LTS recommended).
 
 **Windows:** double-click `run.cmd` or run it from a terminal.
 
@@ -49,35 +56,67 @@ npm install
 npm run dev
 ```
 
-### Supabase (optional)
+## Supabase setup
 
-1. Create a Supabase project and run [`supabase/schema.sql`](supabase/schema.sql) in the SQL Editor. It creates the tables and row-level security policies and seeds the menu.
-2. Copy `.env.example` to `.env.local` and fill in the project URL and anon key.
+**Cloud (free tier):**
 
-## Scripts
+1. Create a project at [supabase.com](https://supabase.com).
+2. Open *SQL Editor*, paste [`supabase/migrations/20260922000000_init.sql`](supabase/migrations/20260922000000_init.sql) and run it.
+3. Copy `.env.example` to `.env.local` and fill in *Project URL* and *anon public key* from *Project Settings → API*.
+4. In *Authentication → URL Configuration* set *Site URL* to your site address (for example `http://localhost:3000`).
 
-| Command | Description |
+**Local (Docker):** `npx supabase start` launches Supabase with the migration applied; `npx supabase status` prints the URL and anon key for `.env.local`.
+
+**Making someone an admin:** after the user has signed up, run in the SQL Editor:
+
+```sql
+insert into admins (user_id) select id from auth.users where email = 'you@example.com';
+```
+
+An "Admin panel" link then appears on their "My orders" page.
+
+## Deploying to Vercel
+
+[Vercel](https://vercel.com) is a hosting service from the authors of Next.js with a free plan for personal projects.
+
+1. Sign in to Vercel with your GitHub account and click *Add New → Project*.
+2. Import the `PizzaGo` repository; the Next.js settings are detected automatically.
+3. Under *Environment Variables* add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`, then click *Deploy*.
+4. Put the resulting `https://….vercel.app` address into Supabase *Site URL*.
+
+Every push to `main` redeploys the site. Without Supabase the demo still works, but orders are kept only in temporary storage.
+
+## Tests
+
+| Command | What it runs |
 |---|---|
-| `npm run dev` | development server |
-| `npm run build` | production build |
-| `npm start` | run the production build |
+| `npm test` | unit tests (Vitest): order validation, cart, translations |
+| `npm run test:e2e` | end-to-end tests (Playwright): builds the app and walks through ordering in a real browser |
+| `npm run typecheck` | TypeScript |
 | `npm run lint` | ESLint |
-| `npm run launch` | same as `run.cmd` / `run.sh` |
+
+Before the first e2e run, install the browser: `npx playwright install chromium`.
+
+GitHub Actions runs all of them on every push and pull request.
 
 ## Project structure
 
 ```
 app/
-  page.tsx            home page: slider and menu
-  checkout/           checkout form
-  success/            order confirmation
-  api/orders/         order creation endpoint
-components/           UI components (cart, cards, dialogs, header, language switcher)
+  page.tsx               home page: slider and menu
+  checkout/  success/    ordering flow
+  login/  account/       sign-in and "My orders"
+  admin/                 admin panel and status Server Action
+  api/orders/            order creation endpoint
+components/              UI components
 lib/
-  i18n/               locales, dictionaries, language context
-  menu.ts             product catalog and banners in both languages
-  order.ts            order validation and total calculation
-  cart-store.ts       cart state (Zustand + persist)
-scripts/start.mjs     cross-platform launcher
-supabase/schema.sql   database schema
+  i18n/                  locales, dictionaries, language context
+  supabase/              Supabase clients for server and browser
+  menu.ts                product catalog in both languages
+  order.ts               order validation and total calculation
+  cart-store.ts          cart state (Zustand + persist)
+proxy.ts                 refreshes the Supabase session cookie
+supabase/migrations/     database schema, RLS policies, seed data
+tests/unit/  tests/e2e/  Vitest and Playwright tests
+scripts/start.mjs        cross-platform launcher
 ```

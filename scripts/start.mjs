@@ -6,7 +6,7 @@
 //   node scripts/start.mjs prod     production build + server
 
 import { spawnSync } from 'node:child_process';
-import { existsSync, readdirSync, rmSync } from 'node:fs';
+import { existsSync, readdirSync, rmSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -27,11 +27,11 @@ function fail(message) {
 
 // 1. Node version
 const [major, minor] = process.versions.node.split('.').map(Number);
-if (major < 20 || (major === 20 && minor < 9)) {
-  fail(`Node.js ${process.versions.node} is too old. Install Node.js 22 LTS from https://nodejs.org`);
-}
-if (major === 20 && minor < 19) {
-  console.warn(`[PizzaGo] Node.js ${process.versions.node} works, but 20.19+ or 22 LTS is recommended.`);
+if (major < 20 || (major === 20 && minor < 19)) {
+  fail(
+    `Node.js ${process.versions.node} is too old: PizzaGo needs 20.19 or newer.\n` +
+      'Install Node.js 22 LTS from https://nodejs.org and run this script again.'
+  );
 }
 
 // 2. Dependencies. Next.js ships a native compiler per OS (@next/swc-<os>-<arch>),
@@ -41,6 +41,17 @@ function installedForThisPlatform() {
   if (!existsSync(nextScope)) return false;
   const prefix = `swc-${process.platform}-${process.arch}`;
   return readdirSync(nextScope).some((name) => name.startsWith(prefix));
+}
+
+// npm writes node_modules/.package-lock.json on install; an older copy means
+// package-lock.json changed since (e.g. after git pull) and deps are missing.
+function outdated() {
+  try {
+    const lock = statSync(path.join(root, 'package-lock.json')).mtimeMs;
+    return lock > statSync(path.join(modules, '.package-lock.json')).mtimeMs;
+  } catch {
+    return true;
+  }
 }
 
 if (!installedForThisPlatform()) {
@@ -57,6 +68,9 @@ if (!installedForThisPlatform()) {
   } else {
     console.log('[PizzaGo] Installing dependencies...');
   }
+  run('npm', ['ci', '--no-audit', '--no-fund']);
+} else if (outdated()) {
+  console.log('[PizzaGo] Dependencies changed, updating...');
   run('npm', ['ci', '--no-audit', '--no-fund']);
 }
 
