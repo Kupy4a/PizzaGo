@@ -21,7 +21,7 @@ A pizza delivery storefront: menu by category, cart, checkout, customer accounts
 - Responsive layout, Esc closes dialogs, labelled controls for screen readers
 
 **Accounts and orders (Supabase)**
-- Sign up and sign in with email and password
+- Sign up and sign in with email and password, plus password recovery by email
 - "My orders" page with the status of every order placed while signed in
 - Admin panel: all orders with customer details, a status switcher (New → Cooking → Delivered / Cancelled) and deletion of an order with its items
 - Access is enforced by PostgreSQL row-level security, not just by the UI: customers only see their own orders, only admins can change statuses
@@ -67,7 +67,9 @@ npm run dev
 2. Open *SQL Editor* and run every file from [`supabase/migrations`](supabase/migrations) in filename order.
 3. Click *Connect* at the top of the project page, choose *App Frameworks → Next.js* and copy the two `NEXT_PUBLIC_…` lines into `.env.local` (see `.env.example`).
    Add `SUPABASE_SERVICE_ROLE_KEY` from *Project Settings → API Keys* as well: the server needs it to store orders. Keep it out of git and out of the browser.
-4. In *Authentication → URL Configuration* set *Site URL* to your site address (for example `http://localhost:3000`).
+4. In *Authentication → URL Configuration* set *Site URL* to your site address (for example `http://localhost:3000`) and add `<your site>/auth/callback**` to *Redirect URLs*, so recovery links are accepted.
+
+Recovery links use the PKCE flow: open the link in the same browser that requested it.
 
 **Local (Docker):** `npx supabase start` launches Supabase with the migration applied; `npx supabase status` prints the URL and key for `.env.local`.
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -103,6 +104,11 @@ export function LoginForm() {
       >
         {signIn ? t.auth.toSignUp : t.auth.toSignIn}
       </button>
+      {signIn && (
+        <Link href="/forgot" className="block text-center mt-2 text-sm text-gray-500 hover:text-primary">
+          {t.auth.forgot}
+        </Link>
+      )}
     </div>
   );
 }
