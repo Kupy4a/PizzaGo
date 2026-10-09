@@ -23,7 +23,7 @@ A pizza delivery storefront: menu by category, cart, checkout, customer accounts
 **Accounts and orders (Supabase)**
 - Sign up and sign in with email and password
 - "My orders" page with the status of every order placed while signed in
-- Admin panel: all orders with customer details and a status switcher (New → Cooking → Delivered / Cancelled)
+- Admin panel: all orders with customer details, a status switcher (New → Cooking → Delivered / Cancelled) and deletion of an order with its items
 - Access is enforced by PostgreSQL row-level security, not just by the UI: customers only see their own orders, only admins can change statuses
 
 Supabase is optional. Without it the shop still works and stores orders in `.data/orders.json`; account pages are hidden.

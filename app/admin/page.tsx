@@ -6,6 +6,7 @@ import { getDictionary } from '@/lib/i18n/dictionaries';
 import { getLocale } from '@/lib/i18n/server';
 import { getCurrentUser, isSupabaseConfigured } from '@/lib/supabase/server';
 import { ORDER_COLUMNS, ORDER_STATUSES, type OrderRow } from '@/lib/orders';
+import { DeleteOrderButton } from '@/components/orders/DeleteOrderButton';
 import { updateOrderStatus } from './actions';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -40,6 +41,7 @@ export default async function AdminPage() {
         <div className="space-y-4">
           {orders.map((order) => (
             <OrderCard key={order.id} order={order} locale={locale} showCustomer>
+              <div className="flex flex-wrap items-center gap-2">
               <form action={updateOrderStatus} className="flex items-center gap-2">
                 <input type="hidden" name="id" value={order.id} />
                 <label htmlFor={`status-${order.id}`} className="sr-only">
@@ -61,6 +63,8 @@ export default async function AdminPage() {
                   {t.admin.save}
                 </Button>
               </form>
+              <DeleteOrderButton orderId={order.id} />
+              </div>
             </OrderCard>
           ))}
         </div>

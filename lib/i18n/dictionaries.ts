@@ -118,6 +118,8 @@ const en = {
     address: 'Address',
     save: 'Save',
     status: 'Status',
+    delete: 'Delete',
+    confirmDelete: 'Delete this order permanently? This cannot be undone.',
   },
   status: {
     pending: 'New',
@@ -252,6 +254,8 @@ const ru: Dictionary = {
     address: 'Адрес',
     save: 'Сохранить',
     status: 'Статус',
+    delete: 'Удалить',
+    confirmDelete: 'Удалить заказ навсегда? Отменить это действие нельзя.',
   },
   status: {
     pending: 'Новый',
