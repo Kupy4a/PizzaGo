@@ -78,6 +78,7 @@ const en = {
     cart_empty: 'Your cart is empty',
     product_unavailable: 'One of the items is unavailable',
     invalid_quantity: 'Invalid quantity',
+    too_many_orders: 'Too many orders from this address. Please try again in an hour.',
     server_error: 'Could not place the order. Please try again later.',
   },
   success: {
@@ -211,6 +212,7 @@ const ru: Dictionary = {
     cart_empty: 'Корзина пуста',
     product_unavailable: 'Один из товаров недоступен',
     invalid_quantity: 'Некорректное количество',
+    too_many_orders: 'Слишком много заказов с этого адреса. Попробуйте через час.',
     server_error: 'Не удалось оформить заказ. Попробуйте позже.',
   },
   success: {

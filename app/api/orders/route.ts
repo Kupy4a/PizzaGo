@@ -4,6 +4,8 @@ import { promises as fs } from 'fs';
 import os from 'os';
 import path from 'path';
 import { getCurrentUser, isSupabaseConfigured } from '@/lib/supabase/server';
+import { createAdminClient, hasServiceRole } from '@/lib/supabase/admin';
+import { clientHash, tooManyRequests } from '@/lib/rate-limit';
 import { validateOrder, type ValidatedOrder } from '@/lib/order';
 
 // Vercel's filesystem is read-only except for the temp dir; orders stored
@@ -27,34 +29,24 @@ async function saveToFile(order: ValidatedOrder) {
   return id;
 }
 
-async function saveToSupabase(order: ValidatedOrder) {
-  const { supabase, user } = await getCurrentUser();
-  // The id is generated here: guests may insert orders but not read them
-  // back, so `insert().select()` would be rejected by row-level security.
-  const id = randomUUID();
-
-  const { error } = await supabase.from('orders').insert({
-    id,
-    user_id: user?.id ?? null,
-    total_price: order.total,
-    status: 'pending',
-    customer: order.customer,
-    address: order.address,
-    payment_method: order.payment,
+// One database function builds the order: it prices the items from the
+// catalog and enforces the hourly limit per visitor. Only the service role
+// may call it, so nobody can place orders around this endpoint.
+async function saveToSupabase(order: ValidatedOrder, hash: string, userId: string | null) {
+  const { data, error } = await createAdminClient().rpc('create_order', {
+    p_customer: order.customer,
+    p_address: order.address,
+    p_payment: order.payment,
+    p_items: order.lines.map((l) => ({ productId: l.productId, quantity: l.quantity })),
+    p_client: hash,
+    p_user_id: userId,
   });
-  if (error) throw error;
 
-  const { error: itemsError } = await supabase.from('order_items').insert(
-    order.lines.map((l) => ({
-      order_id: id,
-      product_id: l.productId,
-      quantity: l.quantity,
-      price_at_purchase: l.price,
-    }))
-  );
-  if (itemsError) throw itemsError;
-
-  return id;
+  if (error) {
+    if (error.message.includes('rate_limited')) return { rateLimited: true as const };
+    throw error;
+  }
+  return { id: data as string };
 }
 
 export async function POST(req: Request) {
@@ -70,10 +62,28 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }
 
+  const hash = clientHash(req);
+
   try {
-    const id = isSupabaseConfigured
-      ? await saveToSupabase(result.order)
-      : await saveToFile(result.order);
+    if (isSupabaseConfigured) {
+      if (!hasServiceRole) {
+        console.error('SUPABASE_SERVICE_ROLE_KEY is missing: orders cannot be stored.');
+        return NextResponse.json({ error: 'server_error' }, { status: 500 });
+      }
+      // The session is read from the cookie, so the order is linked to the
+      // signed-in user without trusting anything the request body claims.
+      const { user } = await getCurrentUser();
+      const saved = await saveToSupabase(result.order, hash, user?.id ?? null);
+      if ('rateLimited' in saved) {
+        return NextResponse.json({ error: 'too_many_orders' }, { status: 429 });
+      }
+      return NextResponse.json({ id: saved.id, total: result.order.total }, { status: 201 });
+    }
+
+    if (tooManyRequests(hash)) {
+      return NextResponse.json({ error: 'too_many_orders' }, { status: 429 });
+    }
+    const id = await saveToFile(result.order);
     return NextResponse.json({ id, total: result.order.total }, { status: 201 });
   } catch (err) {
     console.error('Order creation error:', err);

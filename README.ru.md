@@ -17,6 +17,7 @@
 - Английский и русский интерфейс с переключателем в шапке; выбор запоминается в cookie
 - Корзина сохраняется в `localStorage` и переживает перезагрузку страницы
 - Проверка формы заказа в браузере и на сервере; `POST /api/orders` сам пересчитывает сумму по каталогу, цены с клиента не принимаются
+- Заказы пишет одна функция базы, вызвать её может только сервер; не больше 10 заказов в час с одного посетителя (по хешу, IP-адрес не хранится)
 - Адаптивная вёрстка, закрытие окон по Esc, подписи для экранных дикторов
 
 **Аккаунты и заказы (Supabase)**
@@ -63,8 +64,9 @@ npm run dev
 **В облаке (бесплатный тариф):**
 
 1. Создайте проект на [supabase.com](https://supabase.com).
-2. Откройте *SQL Editor* и по очереди выполните файлы из [`supabase/migrations`](supabase/migrations): сначала `…_init.sql`, затем `…_grants.sql`.
+2. Откройте *SQL Editor* и выполните все файлы из [`supabase/migrations`](supabase/migrations) по порядку имён.
 3. Нажмите *Connect* вверху страницы проекта, выберите *App Frameworks → Next.js* и скопируйте две строки `NEXT_PUBLIC_…` в `.env.local` (образец в `.env.example`).
+   Добавьте туда же `SUPABASE_SERVICE_ROLE_KEY` из *Project Settings → API Keys*: без него сервер не сможет сохранять заказы. Этот ключ не коммитят и не отдают в браузер.
 4. В *Authentication → URL Configuration* укажите в *Site URL* адрес сайта (например, `http://localhost:3000`).
 
 **Локально (Docker):** `npx supabase start` поднимает Supabase с применённой миграцией, `npx supabase status` показывает URL и ключ для `.env.local`.
@@ -83,7 +85,7 @@ insert into admins (user_id) select id from auth.users where email = 'you@exampl
 
 1. Войдите в Vercel через GitHub и нажмите *Add New → Project*.
 2. Импортируйте репозиторий `PizzaGo`; настройки Next.js определятся автоматически.
-3. В *Environment Variables* добавьте те же две переменные, что в `.env.local` (`NEXT_PUBLIC_SUPABASE_URL` и `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`), и нажмите *Deploy*.
+3. В *Environment Variables* добавьте те же три переменные, что в `.env.local`, включая `SUPABASE_SERVICE_ROLE_KEY`, и нажмите *Deploy*.
 4. Полученный адрес `https://….vercel.app` укажите в Supabase в *Site URL*.
 
 Каждый push в `main` обновляет сайт. Без Supabase демо тоже работает, но заказы хранятся только во временном хранилище.

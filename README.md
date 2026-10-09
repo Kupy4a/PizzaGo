@@ -17,6 +17,7 @@ A pizza delivery storefront: menu by category, cart, checkout, customer accounts
 - English / Russian interface with a switcher in the header; the choice is remembered in a cookie
 - The cart is saved in `localStorage` and survives page reloads
 - Checkout validated in the browser and on the server; `POST /api/orders` recalculates the total from the catalog and never trusts prices sent by the client
+- Orders are written by one database function callable only by the server, with a limit of 10 orders per hour per visitor (identified by a hash, no IP is stored)
 - Responsive layout, Esc closes dialogs, labelled controls for screen readers
 
 **Accounts and orders (Supabase)**
@@ -63,8 +64,9 @@ npm run dev
 **Cloud (free tier):**
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. Open *SQL Editor* and run the files from [`supabase/migrations`](supabase/migrations) in order: first `…_init.sql`, then `…_grants.sql`.
+2. Open *SQL Editor* and run every file from [`supabase/migrations`](supabase/migrations) in filename order.
 3. Click *Connect* at the top of the project page, choose *App Frameworks → Next.js* and copy the two `NEXT_PUBLIC_…` lines into `.env.local` (see `.env.example`).
+   Add `SUPABASE_SERVICE_ROLE_KEY` from *Project Settings → API Keys* as well: the server needs it to store orders. Keep it out of git and out of the browser.
 4. In *Authentication → URL Configuration* set *Site URL* to your site address (for example `http://localhost:3000`).
 
 **Local (Docker):** `npx supabase start` launches Supabase with the migration applied; `npx supabase status` prints the URL and key for `.env.local`.
@@ -83,7 +85,7 @@ An "Admin panel" link then appears on their "My orders" page.
 
 1. Sign in to Vercel with your GitHub account and click *Add New → Project*.
 2. Import the `PizzaGo` repository; the Next.js settings are detected automatically.
-3. Under *Environment Variables* add the same two variables as in `.env.local` (`NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`), then click *Deploy*.
+3. Under *Environment Variables* add the same three variables as in `.env.local`, including `SUPABASE_SERVICE_ROLE_KEY`, then click *Deploy*.
 4. Put the resulting `https://….vercel.app` address into Supabase *Site URL*.
 
 Every push to `main` redeploys the site. Without Supabase the demo still works, but orders are kept only in temporary storage.
