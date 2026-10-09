@@ -4,6 +4,8 @@
 
 [![CI](https://github.com/Kupy4a/PizzaGo/actions/workflows/ci.yml/badge.svg)](https://github.com/Kupy4a/PizzaGo/actions/workflows/ci.yml)
 
+**[Live demo →](https://pizza-go-flame.vercel.app)**
+
 A pizza delivery storefront: menu by category, cart, checkout, customer accounts with order history and an admin panel for managing orders. The interface is available in English and Russian.
 
 ![Home page](docs/home.png)

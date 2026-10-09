@@ -4,6 +4,8 @@
 
 [![CI](https://github.com/Kupy4a/PizzaGo/actions/workflows/ci.yml/badge.svg)](https://github.com/Kupy4a/PizzaGo/actions/workflows/ci.yml)
 
+**[Открыть демо →](https://pizza-go-flame.vercel.app)**
+
 Интернет-магазин доставки пиццы: меню по категориям, корзина, оформление заказа, личный кабинет с историей заказов и панель администратора для управления заказами. Интерфейс доступен на английском и русском.
 
 ![Главная страница](docs/ru/home.png)
